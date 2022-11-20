@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "apexcharts": "^3.35.4",
+    "vue-apexcharts": "^1.6.2"
+  },
+  "devDependencies": {
+    "@vue/composition-api": "^1.7.0"
+  }
+}
