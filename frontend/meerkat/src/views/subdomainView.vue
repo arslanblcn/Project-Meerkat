@@ -78,7 +78,7 @@ import NavBar from '../components/NavBar.vue';
         ],
         desserts: [
           {
-            name: 'Frozen Yogurt',
+            name: 'dsfsdfdsfds',
             calories: 159,
             fat: 6.0,
             carbs: 24,

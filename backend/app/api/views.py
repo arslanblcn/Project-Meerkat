@@ -1,10 +1,10 @@
-from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import permissions
 from rest_framework import status
 from .serializers import subDomainSerializer
 from .models import Scans
+from datetime import datetime
 # Create your views here.
 class subDomainFind(APIView):
     permission_classes = [permissions.IsAuthenticated]
@@ -17,10 +17,15 @@ class subDomainFind(APIView):
         data = {
             'scanname': request.data.get('scanname'),
             'domains' : request.data.get('domains'),
+            'created_at': datetime.now(),
+            'user': request.user.id
         }
+        print(data)
         serializer = subDomainSerializer(data=data)
+        print(serializer)
         if serializer.is_valid():
             res = DNSDumpsterAPI().search(data['domains'])
+            print(res)
             serializer.save()
             return Response(res, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
