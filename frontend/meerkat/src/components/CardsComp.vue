@@ -28,9 +28,9 @@
         class="mt-7 ml-2"
       >
         <v-card-title>
-          Founded Indicators
+          Number of Wordlists
           <v-icon large right class="mx-auto" color="success">
-            fa-solid fa-bug
+            fa-solid fa-book
           </v-icon>
         </v-card-title>
         <v-card-text>
@@ -47,7 +47,7 @@
         class="mt-7 ml-2"
       >
         <v-card-title>
-          Windows Analysis
+           Number of Domains
            <v-icon large right class="mx-auto" color="blue">
             fa-brands fa-windows
            </v-icon>
@@ -66,7 +66,7 @@
         class="mt-7 ml-2"
       >
         <v-card-title>
-          Linux Analysis
+          Total 403 Bypass
           <v-icon large right class="mx-auto" color="pink">
             fa-brands fa-linux
            </v-icon>

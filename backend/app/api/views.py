@@ -16,9 +16,9 @@ class dirDiscovery(APIView):
             # Build paths inside the project like this: BASE_DIR / 'subdir'.
             BASE_DIR = Path(__file__).resolve().parent.parent 
             dir = os.listdir(BASE_DIR / "wordlists/")
-            return Response(dir, status=status.HTTP_200_CREATED)
+            return Response(dir, status=status.HTTP_200_OK)
         except:
-            return Response("Only json file is exceptable", status=status.HTTP_404_NOT_FOUND)
+            return Response({'error':'There is an error while getting wordlists'}, status=status.HTTP_400_BAD_REQUEST)
     def post(self, request, *args, **kwargs):
         import os
         from pathlib import Path
