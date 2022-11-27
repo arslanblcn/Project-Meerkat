@@ -22,57 +22,6 @@
             </div>   
         </v-card>
         </v-col> 
-        <v-col cols="12" sm="3">
-          <v-card 
-        outlined
-        width="370"
-        height="400"
-        class="mt-7 mx-1">
-            <v-card-title>Are Services Running?</v-card-title> 
-            <v-card-text class="d-flex justify-space-between">
-              <p class="headline">MISP</p>
-              <v-chip
-                class="ma-2"
-                color="success"
-                label
-                text-color="white"
-              >
-                <v-icon left>
-                  fa-solid fa-fire
-                </v-icon>
-                Running
-              </v-chip>
-            </v-card-text>
-            <v-card-text class="d-flex justify-space-between">
-              <p class="headline">Cortex</p>
-              <v-chip
-                class="ma-2"
-                color="success"
-                label
-                text-color="white"
-              >
-                <v-icon left>
-                  fa-solid fa-fire
-                </v-icon>
-                Running
-              </v-chip>
-            </v-card-text> 
-            <v-card-text class="d-flex justify-space-between">
-              <p class="headline">Elasticsearch</p>
-              <v-chip
-                class="ma-2"
-                color="success"
-                label
-                text-color="white"
-              >
-                <v-icon left>
-                  fa-solid fa-fire
-                </v-icon>
-                Running
-              </v-chip>
-            </v-card-text> 
-        </v-card>
-        </v-col>
     </v-row>
 </template>
 
