@@ -1,148 +1,237 @@
 <template>
-<v-app :style="{ background: $vuetify.theme.themes.dark.background }">
-<SideBar />
-<NavBar />
-  <v-main>
-    <template>
+  <v-app :style="{ background: $vuetify.theme.themes.dark.background }">
+    <SideBar />
+    <NavBar />
+    <v-main>
       <v-form>
-        <v-container>
-          <v-row>
-            <v-col
-          cols="12"
-          sm="6"
+        <v-row class="mt-6">
+          <v-col cols="2">
+            <v-text-field
+              v-model="name"
+              label="Name"
+              outlined
+              dense
+              clearable
+            ></v-text-field
+          ></v-col>
+          <v-col cols="4">
+            <v-text-field
+              v-model="domain"
+              label="Domain Address"
+              dense
+              outlined
+              clearable
+            ></v-text-field></v-col
+          ><v-col
+            ><v-btn color="white" elevation="2" outlined dark rounded
+              >Find</v-btn
+            ></v-col
+          ></v-row
         >
-          <v-text-field
-            v-model="message4"
-            label="Outlined"
-            outlined
-            clearable
-          ></v-text-field>
-        </v-col>
-          </v-row>
-        </v-container>
       </v-form>
-    </template>
-    <v-row class="mt-3">
-      <v-col cols="12" sm="9">
+
+      <v-row class="mt-3 ml-1">
         <v-card>
-        <v-card-title>
-          Results
-          <v-spacer></v-spacer>
-          <v-text-field
-            v-model="search"
-            append-icon="mdi-magnify"
-            label="Search"
-            single-line
-            hide-details
-          ></v-text-field>
-        </v-card-title>
-        <v-data-table
-          :headers="headers"
-          :items="desserts"
-          :search="search"
-        ></v-data-table>
-      </v-card>
-      </v-col>
-    </v-row>
-  </v-main>
-</v-app>
+          <v-card-title>
+            Results
+            <v-spacer></v-spacer>
+            <v-text-field
+              v-model="search"
+              append-icon="mdi-magnify"
+              label="Search"
+              single-line
+              hide-details
+            ></v-text-field>
+          </v-card-title>
+          <v-data-table :headers="headers" :items="domains" :search="search">
+            <template v-slot:[`item.actions`]="{ item }">
+              <v-menu top>
+                <template v-slot:activator="{ on, attrs }">
+                  <v-btn v-bind="attrs" v-on="on" icon>
+                    <v-icon>mdi-cog-outline</v-icon>
+                  </v-btn>
+                </template>
+
+                <v-list dense>
+                  <v-list-item link @click="subdomainBruteForce(item, 'subF')">
+                    <v-list-item-title>
+                      <v-icon left>mdi-arrow-collapse-all </v-icon>Subdomain
+                      Bruteforce
+                    </v-list-item-title>
+                  </v-list-item>
+                  <v-list-item link>
+                    <v-list-item-title @click="wafDetect(item)">
+                      <v-icon left>mdi-arrow-collapse-all</v-icon>Waf Detect
+                    </v-list-item-title>
+                  </v-list-item>
+                  <v-list-item link>
+                    <v-list-item-title @click="wafDetect(item)">
+                      <v-icon left>mdi-arrow-collapse-all</v-icon>Port Scan
+                    </v-list-item-title>
+                  </v-list-item>
+                  <v-list-item link>
+                    <v-list-item-title @click="wafDetect(item)">
+                      <v-icon left>mdi-arrow-collapse-all</v-icon>Wayback Scan
+                    </v-list-item-title>
+                  </v-list-item>
+                </v-list>
+              </v-menu>
+            </template>
+            <template v-slot:no-data>
+              <v-btn color="primary" @click="initialize"> Reset </v-btn>
+            </template>
+          </v-data-table>
+        </v-card>
+      </v-row>
+      <Dialog
+        :dialog="dialog"
+        :attackType="attackType"
+        @closeDialog="dialog = false"
+      />
+    </v-main>
+  </v-app>
 </template>
 
-<script>
-import SideBar from '@/components/SideBar.vue';
-import NavBar from '../components/NavBar.vue';
-
-  export default {
-    name: 'subdomainView',
-    components: {
+<script>/* eslint-disable */
+import SideBar from "@/components/SideBar.vue";
+import NavBar from "../components/NavBar.vue";
+import Dialog from "../components/AttackDialog.vue";
+export default {
+  name: "subdomainView",
+  components: {
     SideBar,
-    NavBar
+    NavBar,
+    Dialog,
   },
-  data () {
-      return {
-        loader: null,
-        loading4: false,
-        search: '',
-        headers: [
-          {
-            text: 'Dessert (100g serving)',
-            align: 'start',
-            sortable: false,
-            value: 'name',
-          },
-          { text: 'Calories', value: 'calories' },
-          { text: 'Fat (g)', value: 'fat' },
-          { text: 'Carbs (g)', value: 'carbs' },
-          { text: 'Protein (g)', value: 'protein' },
-          { text: 'Iron (%)', value: 'iron' },
-        ],
-        desserts: [
-          {
-            name: 'dsfsdfdsfds',
-            calories: 159,
-            fat: 6.0,
-            carbs: 24,
-            protein: 4.0,
-            iron: '1%',
-          },
-          {
-            name: 'Ice cream sandwich',
-            calories: 237,
-            fat: 9.0,
-            carbs: 37,
-            protein: 4.3,
-            iron: '1%',
-          },
-        ],
-      }
-    },
-    watch: {
-      loader () {
-        const l = this.loader
-        this[l] = !this[l]
+  data() {
+    return {
+      loader: null,
+      loading4: false,
+      domain: null,
+      dialog: false,
+      name: null,
+      attackType: null,
+      search: "",
+      headers: [
+        { text: "Header", value: "header", width: 200, align: "start" },
+        {
+          text: "Domain Address",
+          sortable: false,
+          value: "domain",
+          width: 125,
+          align: "center",
+        },
+        { text: "IP", value: "ip", width: 125, align: "center" },
+        {
+          text: "Reverse DNS",
+          value: "reverse_dns",
+          sortable: false,
+          width: 100,
+          align: "center",
+        },
+        {
+          text: "As",
+          value: "as",
+          sortable: false,
+          width: 125,
+          align: "center",
+        },
+        {
+          text: "Provider",
+          value: "provider",
+          width: 125,
+          sortable: false,
+          align: "center",
+        },
+        {
+          text: "Country",
+          value: "country",
+          width: 125,
+          sortable: false,
+          align: "center",
+        },
 
-        setTimeout(() => (this[l] = false), 3000)
+        { text: "Actions", value: "actions", align: "end" },
+      ],
+      domains: [
+        {
+          domain: "tcc.thy.com",
+          ip: "46.31.112.160",
+          reverse_dns: "",
+          as: "THY-ASTurkey",
+          provider: "",
+          country: "Turkey",
+          header: "BigIPHTTPS: Microsoft-IIS/10.0HTTPS TECH: IIS,10.0ASP.NET",
+        },
+        {
+          domain: "tcc.thy.com",
+          ip: "46.31.112.160",
+          reverse_dns: "",
+          as: "THY-ASTurkey",
+          provider: "",
+          country: "Turkey",
+          header: "BigIPHTTPS: Microsoft-IIS/10.0HTTPS TECH: IIS,10.0ASP.NET",
+        },
+      ],
+    };
+  },
+  watch: {
+    loader() {
+      const l = this.loader;
+      this[l] = !this[l];
 
-        this.loader = null
-      },
+      setTimeout(() => (this[l] = false), 3000);
+
+      this.loader = null;
     },
-}
+  },
+  methods: {
+    subdomainBruteForce(item, attackType) {
+      this.dialog = true;
+      this.attackType = attackType;
+      console.log(item);
+    },
+    wafDetect(item) {
+      console.log(item);
+    },
+  },
+};
 </script>
 <style>
-  .custom-loader {
-    animation: loader 1s infinite;
-    display: flex;
+.custom-loader {
+  animation: loader 1s infinite;
+  display: flex;
+}
+@-moz-keyframes loader {
+  from {
+    transform: rotate(0);
   }
-  @-moz-keyframes loader {
-    from {
-      transform: rotate(0);
-    }
-    to {
-      transform: rotate(360deg);
-    }
+  to {
+    transform: rotate(360deg);
   }
-  @-webkit-keyframes loader {
-    from {
-      transform: rotate(0);
-    }
-    to {
-      transform: rotate(360deg);
-    }
+}
+@-webkit-keyframes loader {
+  from {
+    transform: rotate(0);
   }
-  @-o-keyframes loader {
-    from {
-      transform: rotate(0);
-    }
-    to {
-      transform: rotate(360deg);
-    }
+  to {
+    transform: rotate(360deg);
   }
-  @keyframes loader {
-    from {
-      transform: rotate(0);
-    }
-    to {
-      transform: rotate(360deg);
-    }
+}
+@-o-keyframes loader {
+  from {
+    transform: rotate(0);
   }
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes loader {
+  from {
+    transform: rotate(0);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
 </style>
