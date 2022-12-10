@@ -47,6 +47,7 @@ class dirDiscovery(APIView):
                 print(e)
         for t in ts:
             t.join()
+            
 class subDomainFind(APIView):
     permission_classes = [permissions.IsAuthenticated]
     def get(self, request):
