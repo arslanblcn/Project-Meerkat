@@ -8,41 +8,46 @@ from datetime import datetime
 # Create your views here.
 
 class dirDiscovery(APIView):
-    permission_classes=[permissions.IsAuthenticated]
-    def get(self, request):
-        import os
-        from pathlib import Path
-        try:
-            # Build paths inside the project like this: BASE_DIR / 'subdir'.
-            BASE_DIR = Path(__file__).resolve().parent.parent 
-            dir = os.listdir(BASE_DIR / "wordlists/")
-            return Response(dir, status=status.HTTP_200_OK)
-        except:
-            return Response({'error':'There is an error while getting wordlists'}, status=status.HTTP_400_BAD_REQUEST)
+    permission_classes = [permissions.IsAuthenticated]
     def post(self, request, *args, **kwargs):
-        import os
-        from pathlib import Path
-        import json
+        import requests, threading, queue
         data = {
-            'filename': request.data.get('filename').replace(" ", ""),
-            'content': request.data.get('content')
+            'url': request.data.get('url'),
+            'wordlist': request.data.get('wordlist'),
+            'thread_num': request.data.get('thread_num')
         }
-        if data['filename'].endswith('.json'):
-            return Response({'error':'[!] Only json file is exceptable'}, status=status.HTTP_400_BAD_REQUEST)
-        else:
+        def scanner():
+            hits = []
+            statusList = [200,301,302,403]
             try:
-                dictionary = {}
-                for i in range(len(data['content'])):
-                    dictionary[i] = f"{data['content'][i]}"
-                # Build paths inside the project like this: BASE_DIR / 'subdir'.
-                currentDir = Path(__file__).resolve().parent.parent / 'wordlists'
-                with open(os.path.join(currentDir, data['filename']+".json"), "w+") as fp:
-                    json.dump(data['content'], fp, indent=4)
-                return Response({'success':'[+] Wordlist created!'}, status=status.HTTP_201_CREATED)
-            except:
-                return Response("[!] There was an error while creating wordlist!", status=status.HTTP_400_BAD_REQUEST)
+                while not q.empty():
+                    inject = q.get()
+                    kn0ck = '{}/{}'.format(data['url'],inject)
+                    r = requests.get(kn0ck)
+                    ret = f'{r.status_code}'           
+                    if ret in statusList:
+                        hits.append((kn0ck,ret))
+                    return Response({f"{kn0ck} : {ret}"}, status=status.HTTP_200_OK)
+            except KeyboardInterrupt:
+                print("Program terminated by user.")
 
-
+        count = 0
+        q = queue.Queue()
+        for word in data['wordlist']:
+            q.put(word)
+            count += 1
+        # Handling threads
+        ts = []
+        for i in range(0,data['thread_num']):
+            try:
+                t = threading.Thread(target=scanner)
+                ts.append(t)
+                t.start()
+            except Exception as e:
+                print(e)
+        for t in ts:
+            t.join()
+            
 class subDomainFind(APIView):
     permission_classes = [permissions.IsAuthenticated]
     def get(self, request):
