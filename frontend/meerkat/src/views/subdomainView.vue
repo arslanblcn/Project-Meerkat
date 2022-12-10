@@ -23,7 +23,7 @@
               clearable
             ></v-text-field></v-col
           ><v-col
-            ><v-btn color="white" elevation="2" outlined dark rounded
+            ><v-btn  elevation="2" outlined  rounded
               >Find</v-btn
             ></v-col
           ></v-row
