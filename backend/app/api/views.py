@@ -5,8 +5,34 @@ from rest_framework import status
 from .serializers import subDomainSerializer
 from .models import Scans
 from datetime import datetime
+
 # Create your views here.
 
+class waybackURL(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+    def get(self, request):
+        
+        return Response("Search historic URLs", status=status.HTTP_200_OK)
+    def post(self, request, *args, **kwargs):
+        import waybackpy
+        data = {
+            'url': request.data.get('url'),
+            'year': request.data.get('year')
+        }
+        UA = "Mozilla/5.0 (iPad; CPU OS 8_1_1 like Mac OS X) AppleWebKit/600.1.4 (KHTML, like Gecko) Version/8.0 Mobile/12B435 Safari/600.1.4"
+        knowns = waybackpy.Url(url=data['url'], user_agent=UA).near(year=data['year']).known_urls(subdomain=False) # alive and subdomain are optional.
+        return Response(knowns, status=status.HTTP_200_OK)
+class wafDetect(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+    def get(self, request):
+        
+        return Response("Detect Firewall", status=status.HTTP_200_OK)
+    def post(self, request, *args, **kwargs):
+      import subprocess
+      data = {
+            'url': request.data.get('url'),
+        }
+      return Response(subprocess.check_output(["wafw00f", data['url']]), status=status.HTTP_200_OK)  
 class dirDiscovery(APIView):
     permission_classes = [permissions.IsAuthenticated]
     def post(self, request, *args, **kwargs):
@@ -47,7 +73,7 @@ class dirDiscovery(APIView):
                 print(e)
         for t in ts:
             t.join()
-            
+
 class subDomainFind(APIView):
     permission_classes = [permissions.IsAuthenticated]
     def get(self, request):
