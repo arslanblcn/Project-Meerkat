@@ -15,7 +15,16 @@
         </v-row>
         <v-row>
           <v-col cols="12">
-            <v-select dense outlined label="Word File Name"></v-select>
+              <v-file-input
+              chips
+              outlined
+              dense
+              label="File"
+              accept=".txt"
+              show-size
+              small-chips
+              truncate-length="20"
+            ></v-file-input>
           </v-col>
         </v-row>
       </v-card-text>
