@@ -36,43 +36,33 @@ class wafDetect(APIView):
 class dirDiscovery(APIView):
     permission_classes = [permissions.IsAuthenticated]
     def post(self, request, *args, **kwargs):
-        import requests, threading, queue
+        import concurrent.futures 
+        import requests, os 
+        from pathlib import Path
+        context = {}
         data = {
             'url': request.data.get('url'),
-            'wordlist': request.data.get('wordlist'),
-            'thread_num': request.data.get('thread_num')
+            'filename': request.data.get('filename')
         }
-        def scanner():
-            hits = []
-            statusList = [200,301,302,403]
-            try:
-                while not q.empty():
-                    inject = q.get()
-                    kn0ck = '{}/{}'.format(data['url'],inject)
-                    r = requests.get(kn0ck)
-                    ret = f'{r.status_code}'           
-                    if ret in statusList:
-                        hits.append((kn0ck,ret))
-                    return Response({f"{kn0ck} : {ret}"}, status=status.HTTP_200_OK)
-            except KeyboardInterrupt:
-                print("Program terminated by user.")
-
-        count = 0
-        q = queue.Queue()
-        for word in data['wordlist']:
-            q.put(word)
-            count += 1
-        # Handling threads
-        ts = []
-        for i in range(0,data['thread_num']):
-            try:
-                t = threading.Thread(target=scanner)
-                ts.append(t)
-                t.start()
-            except Exception as e:
-                print(e)
-        for t in ts:
-            t.join()
+        BASE_DIR = Path(__file__).resolve().parent.parent
+        BASE_URL = data['url'] # A list of potential directory names to try 
+        wordlist = str(BASE_DIR) + f"/wordlists/{data['filename']}"
+        dirs = []
+        if os.path.exists(wordlist):
+            with open(wordlist, 'r') as fp:
+                words = fp.readlines()
+             # Perform the attack using multithreading 
+            with concurrent.futures.ThreadPoolExecutor() as executor: 
+                for directory in words: 
+                    url = BASE_URL + directory 
+                    future = executor.submit(requests.get, url)
+                    response = future.result() 
+                    if response.status_code == 200: 
+                        dirs.append(directory)
+            return Response(dirs, status=status.HTTP_200_OK)
+        else:
+            return Response("There is no such a file", status=status.HTTP_200_OK)
+        
 
 class subDomainFind(APIView):
     permission_classes = [permissions.IsAuthenticated]
