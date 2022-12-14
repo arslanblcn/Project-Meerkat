@@ -134,6 +134,6 @@ class subDomainFind(APIView):
                 except httpx.HTTPError as exc:
                     print(f"HTTP Exception for {exc.request.url} - {exc}")
             #print(res)
-            #serializer.save()
+            serializer.save()
             return Response(subs, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

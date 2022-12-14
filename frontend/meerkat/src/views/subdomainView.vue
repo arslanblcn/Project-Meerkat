@@ -173,7 +173,7 @@ export default {
       const article = { scanname: this.name, domains: this.domain,user:1 };
       axios
         .post("http://localhost:8000/api/sublist3r/",article)
-        .then((response) =>{console.log(response); this.domains=response.data.dns_records.host} );
+        .then((response) =>{console.log(response); this.domains=response.data} );
     },
     subdomainBruteForce(item, attackType) {
       this.dialog = true;
