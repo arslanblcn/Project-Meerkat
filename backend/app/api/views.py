@@ -8,7 +8,6 @@ from datetime import datetime
 # Create your views here.
 
 class dirDiscovery(APIView):
-    permission_classes = [permissions.IsAuthenticated]
     def post(self, request, *args, **kwargs):
         import requests, threading, queue
         data = {
@@ -49,7 +48,6 @@ class dirDiscovery(APIView):
             t.join()
             
 class subDomainFind(APIView):
-    permission_classes = [permissions.IsAuthenticated]
     def get(self, request):
         scans = Scans.objects.filter(user=request.user.id)
         serializer = subDomainSerializer(scans, many=True)
@@ -60,7 +58,7 @@ class subDomainFind(APIView):
             'scanname': request.data.get('scanname'),
             'domains' : request.data.get('domains'),
             'created_at': datetime.now(),
-            'user': request.user.id
+            'user': request.data.get('user')
         }
         print(data)
         serializer = subDomainSerializer(data=data)
