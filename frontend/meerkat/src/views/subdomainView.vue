@@ -23,7 +23,7 @@
               clearable
             ></v-text-field></v-col
           ><v-col
-            ><v-btn  elevation="2" outlined  rounded
+            ><v-btn elevation="2" outlined rounded @click="getList"
               >Find</v-btn
             ></v-col
           ></v-row
@@ -77,9 +77,7 @@
                 </v-list>
               </v-menu>
             </template>
-            <template v-slot:no-data>
-              <v-btn color="primary" @click="initialize"> Reset </v-btn>
-            </template>
+   
           </v-data-table>
         </v-card>
       </v-row>
@@ -92,10 +90,12 @@
   </v-app>
 </template>
 
-<script>/* eslint-disable */
+<script>
+/* eslint-disable */
 import SideBar from "@/components/SideBar.vue";
 import NavBar from "../components/NavBar.vue";
 import Dialog from "../components/AttackDialog.vue";
+import axios from "axios";
 export default {
   name: "subdomainView",
   components: {
@@ -154,24 +154,7 @@ export default {
         { text: "Actions", value: "actions", align: "end" },
       ],
       domains: [
-        {
-          domain: "tcc.thy.com",
-          ip: "46.31.112.160",
-          reverse_dns: "",
-          as: "THY-ASTurkey",
-          provider: "",
-          country: "Turkey",
-          header: "BigIPHTTPS: Microsoft-IIS/10.0HTTPS TECH: IIS,10.0ASP.NET",
-        },
-        {
-          domain: "tcc.thy.com",
-          ip: "46.31.112.160",
-          reverse_dns: "",
-          as: "THY-ASTurkey",
-          provider: "",
-          country: "Turkey",
-          header: "BigIPHTTPS: Microsoft-IIS/10.0HTTPS TECH: IIS,10.0ASP.NET",
-        },
+
       ],
     };
   },
@@ -186,6 +169,12 @@ export default {
     },
   },
   methods: {
+    getList() {
+      const article = { scanname: this.name, domains: this.domain,user:1 };
+      axios
+        .post("http://localhost:8000/api/sublist3r/",article)
+        .then((response) =>{console.log(response); this.domains=response.data} );
+    },
     subdomainBruteForce(item, attackType) {
       this.dialog = true;
       this.attackType = attackType;

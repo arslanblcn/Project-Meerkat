@@ -65,7 +65,6 @@ class wafDetect(APIView):
         }
       return Response(subprocess.check_output(["wafw00f", data['url']]), status=status.HTTP_200_OK)  
 class dirDiscovery(APIView):
-    permission_classes = [permissions.IsAuthenticated]
     def post(self, request, *args, **kwargs):
         import concurrent.futures 
         import requests, os 
@@ -96,7 +95,6 @@ class dirDiscovery(APIView):
         
 
 class subDomainFind(APIView):
-    permission_classes = [permissions.IsAuthenticated]
     def get(self, request):
         scans = Scans.objects.filter(user=request.user.id)
         serializer = subDomainSerializer(scans, many=True)
@@ -108,7 +106,7 @@ class subDomainFind(APIView):
             'scanname': request.data.get('scanname'),
             'domains' : request.data.get('domains'),
             'created_at': datetime.now(),
-            'user': request.user.id
+            'user': request.data.get('user')
         }
         
         serializer = subDomainSerializer(data=data)
