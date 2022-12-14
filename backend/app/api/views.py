@@ -5,9 +5,40 @@ from rest_framework import status
 from .serializers import subDomainSerializer
 from .models import Scans
 from datetime import datetime
-
+import urllib3
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 # Create your views here.
-
+class bypass403(APIView):
+    def post(self, request, *args, **kwargs):
+        import requests
+        data = {
+            'url': request.data.get('url'),
+            'path': request.data.get('path')
+        }
+        headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.111 Safari/537.36"}
+        BASE_URL = data['url'] + data['path']
+        response = requests.get(BASE_URL, headers=headers, verify=False)
+        findings = []
+        if response.status_code == 403:
+            payloads = ["X-Originating-IP",
+                        "X-Forwarded-For",
+                        "X-Forwarded",
+                        "Forwarded-For",
+                        "X-Remote-IP",
+                        "X-Remote-Addr",
+                        "X-ProxyUser-Ip",
+                        "X-Original-URL",
+                        "Client-IP",
+                        "True-Client-IP",
+                        "Cluster-Client-IP",
+                        "X-ProxyUser-Ip",
+                        "Host"]
+            for header in payloads:
+                headers[header] = "127.0.0.1"
+                resp = requests.get(BASE_URL, headers=headers,verify=False)
+                if resp.status_code <= 400:
+                    findings.append(resp)
+        return Response(findings, status=status.HTTP_200_OK)
 class waybackURL(APIView):
     permission_classes = [permissions.IsAuthenticated]
     def get(self, request):
@@ -72,18 +103,39 @@ class subDomainFind(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
     def post(self, request, *args, **kwargs):
         from dnsdumpster.DNSDumpsterAPI import DNSDumpsterAPI
+        import httpx
         data = {
             'scanname': request.data.get('scanname'),
             'domains' : request.data.get('domains'),
             'created_at': datetime.now(),
             'user': request.user.id
         }
-        print(data)
+        
         serializer = subDomainSerializer(data=data)
         print(serializer)
         if serializer.is_valid():
             res = DNSDumpsterAPI().search(data['domains'])
-            print(res)
-            serializer.save()
-            return Response(res, status=status.HTTP_200_OK)
+            subs = []
+            dns = res.get("dns_records")
+            for host in dns['host']:
+                try:
+                    response = httpx.get("http://" + str(host['domain']))
+                    if response.status_code is 200 or 301 or 302:
+                        #print(host['domain'])
+                        context = {
+                            'domain': host['domain'],
+                            'ip': host['ip'],
+                            'reverse_dns': host['reverse_dns'],
+                            'as': host['as'],
+                            'provider': host['provider'],
+                            'country': host['country'],
+                            'header': host['header']
+                        }
+                        subs.append(context)
+                        print(context)
+                except httpx.HTTPError as exc:
+                    print(f"HTTP Exception for {exc.request.url} - {exc}")
+            #print(res)
+            #serializer.save()
+            return Response(subs, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
