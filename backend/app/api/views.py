@@ -39,6 +39,54 @@ class bypass403(APIView):
                 if resp.status_code <= 400:
                     findings.append(resp)
         return Response(findings, status=status.HTTP_200_OK)
+
+class secretFinder(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+    def post (self, request, *args, **kwargs):
+        import re
+        from bs4 import BeautifulSoup
+        import requests
+
+        data = {
+            'urls': request.data.get('urls')
+        }
+        api_key_regex = r"([0-9a-zA-Z/+]{40})"
+
+        finding = {"url":[], 'key': []}
+        str1 = ""
+        # Loop over the URLs
+        for url in data['urls']:
+            # Make a GET request to the URL
+            response = requests.get(url)
+            # Parse the response as HTML
+            soup = BeautifulSoup(response.text, "html.parser")
+            # Use the regular expression to find the API key in the HTML
+            api_key = re.findall(api_key_regex, str(soup))
+            
+            # If an API key was found, print it
+            if api_key is not None:
+                finding["url"].append(url)
+                finding['key'].append(str1.join(api_key))
+        return Response(finding, status=status.HTTP_200_OK)
+                    
+class jsFinder(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+    def post(self, request, *args, **kwargs):
+        from bs4 import BeautifulSoup
+        import requests
+        data = {'url': request.data.get('url')}
+        headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.111 Safari/537.36"}
+        response = requests.get("http://" + str(data['url']), verify=False, headers=headers)
+        soup = BeautifulSoup(response.text, "html.parser")
+
+        # Iterate over the script tags and collect the URLs of the JavaScript files
+        js_files = []
+        for script in soup.find_all("script"):
+            if script.attrs.get("src"):
+                url = script.attrs.get("src")
+                js_files.append(url)
+        return Response(js_files, status=status.HTTP_200_OK)
+
 class waybackURL(APIView):
     permission_classes = [permissions.IsAuthenticated]
     def get(self, request):
@@ -118,7 +166,8 @@ class subDomainFind(APIView):
             for host in dns['host']:
                 try:
                     response = httpx.get("http://" + str(host['domain']))
-                    if response.status_code is 200 or 301 or 302:
+                    accepted_status = [200, 301, 302]
+                    if response.status_code in accepted_status:
                         #print(host['domain'])
                         context = {
                             'domain': host['domain'],
