@@ -127,6 +127,12 @@ class wafDetect(APIView):
         }
       return Response(subprocess.check_output(["wafw00f", data['url']]), status=status.HTTP_200_OK)  
 class dirDiscovery(APIView):
+    def get(self, request):
+        import os
+        from pathlib import Path
+        BASE_DIR = Path(__file__).resolve().parent.parent 
+        wordlist = os.listdir(str(BASE_DIR) + "/wordlists")
+        return Response(wordlist, status=status.HTTP_200_OK)
     def post(self, request, *args, **kwargs):
         import concurrent.futures 
         import requests, os 
@@ -172,7 +178,6 @@ class subDomainFind(APIView):
         }
         
         serializer = subDomainSerializer(data=data)
-        print(serializer)
         if serializer.is_valid():
             res = DNSDumpsterAPI().search(data['domains'])
             subs = []
