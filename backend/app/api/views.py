@@ -40,6 +40,20 @@ class bypass403(APIView):
                     findings.append(resp)
         return Response(findings, status=status.HTTP_200_OK)
 
+class webAnalyzer(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+    def post(self, request, *args, **kwargs):
+        from Wappalyzer import Wappalyzer, WebPage
+        data = {
+            'urls': request.data.get('urls')
+        }
+        results = {}
+        for url in data['urls']:
+            webpage = WebPage.new_from_url('http://' + str(url))
+            wappalyzer = Wappalyzer.latest()
+            response = wappalyzer.analyze(webpage)
+            results[url] = response
+        return Response(results, status=status.HTTP_200_OK)
 class secretFinder(APIView):
     permission_classes = [permissions.IsAuthenticated]
     def post (self, request, *args, **kwargs):
