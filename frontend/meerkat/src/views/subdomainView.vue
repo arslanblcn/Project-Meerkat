@@ -23,7 +23,12 @@
               clearable
             ></v-text-field></v-col
           ><v-col
-            ><v-btn elevation="2" outlined rounded @click="getList"
+            ><v-btn
+              :loading="loading"
+              elevation="2"
+              outlined
+              rounded
+              @click="getList"
               >Find</v-btn
             ></v-col
           ></v-row
@@ -55,36 +60,50 @@
                 <v-list dense>
                   <v-list-item link @click="subdomainBruteForce(item, 'subF')">
                     <v-list-item-title>
-                      <v-icon left>mdi-arrow-collapse-all </v-icon>Subdomain
-                      Bruteforce
+                      <v-icon left>mdi-arrow-collapse-all </v-icon>Directory
+                      Discovery
                     </v-list-item-title>
                   </v-list-item>
                   <v-list-item link>
-                    <v-list-item-title @click="wafDetect(item)">
-                      <v-icon left>mdi-arrow-collapse-all</v-icon>Waf Detect
+                    <v-list-item-title @click="webAnalyzer(item)">
+                      <v-icon left>mdi-arrow-collapse-all</v-icon>Web Analyzer
                     </v-list-item-title>
                   </v-list-item>
                   <v-list-item link>
-                    <v-list-item-title @click="wafDetect(item)">
-                      <v-icon left>mdi-arrow-collapse-all</v-icon>Port Scan
+                    <v-list-item-title @click="jsFinder(item)">
+                      <v-icon left>mdi-arrow-collapse-all</v-icon>JS Finder
                     </v-list-item-title>
                   </v-list-item>
                   <v-list-item link>
-                    <v-list-item-title @click="wafDetect(item)">
+                    <v-list-item-title @click="wbScan(item)">
                       <v-icon left>mdi-arrow-collapse-all</v-icon>Wayback Scan
                     </v-list-item-title>
                   </v-list-item>
                 </v-list>
               </v-menu>
             </template>
-   
           </v-data-table>
         </v-card>
       </v-row>
       <Dialog
         :dialog="dialog"
-        :attackType="attackType"
+        :dirDiscoveryObj="dirDiscoveryObj"
         @closeDialog="dialog = false"
+      />
+      <web-analyzer
+        :dialog="analyzerDialog"
+        :url="analyzerUrl"
+        @closeAnalyzerDialog="analyzerDialog = false"
+      />
+      <js-finder
+        :dialog="finderDialog"
+        :url="finderUrl"
+        @closeFinderDialog="finderDialog = false"
+      />
+      <wayback-scan
+        :dialog="wbscanDialog"
+        :url="wbscanUrl"
+        @closeScanDialog="wbscanDialog = false"
       />
     </v-main>
   </v-app>
@@ -95,6 +114,9 @@
 import SideBar from "@/components/SideBar.vue";
 import NavBar from "../components/NavBar.vue";
 import Dialog from "../components/AttackDialog.vue";
+import WebAnalyzer from "../components/WebAnalyzer.vue";
+import JsFinder from "../components/JsFinder.vue";
+import WaybackScan from "../components/WaybackScan.vue";
 import axios from "axios";
 export default {
   name: "subdomainView",
@@ -102,9 +124,20 @@ export default {
     SideBar,
     NavBar,
     Dialog,
+    WebAnalyzer,
+    JsFinder,
+    WaybackScan
   },
   data() {
     return {
+      dirDiscoveryObj: {},
+      analyzerDialog: false,
+      analyzerUrl: null,
+      finderDialog: false,
+      wbscanDialog:false,
+      wbscanUrl:null,
+      finderUrl: null,
+      loading: false,
       loader: null,
       loading4: false,
       domain: null,
@@ -153,9 +186,7 @@ export default {
 
         { text: "Actions", value: "actions", align: "end" },
       ],
-      domains: [
-
-      ],
+      domains: [],
     };
   },
   watch: {
@@ -169,13 +200,30 @@ export default {
     },
   },
   methods: {
+    wbScan(item) {
+      this.wbscanDialog = true;
+      this.wbscanUrl = item.domain;
+    },
+    webAnalyzer(item) {
+      this.analyzerDialog = true;
+      this.analyzerUrl = item.domain;
+    },
+    jsFinder(item) {
+      this.finderDialog = true;
+      this.finderUrl = item.domain;
+    },
     getList() {
-      const article = { scanname: this.name, domains: this.domain,user:1 };
+      this.loading = true;
+      const article = { scanname: this.name, domains: this.domain, user: 1 };
       axios
-        .post("http://localhost:8000/api/sublist3r/",article)
-        .then((response) =>{console.log(response); this.domains=response.data} );
+        .post("http://localhost:8000/api/sublist3r/", article)
+        .then((response) => {
+          this.loading = false;
+          this.domains = response.data;
+        });
     },
     subdomainBruteForce(item, attackType) {
+      this.dirDiscoveryObj = item;
       this.dialog = true;
       this.attackType = attackType;
       console.log(item);
