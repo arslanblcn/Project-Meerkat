@@ -178,7 +178,6 @@ class subDomainFind(APIView):
         }
         
         serializer = subDomainSerializer(data=data)
-        print(serializer)
         if serializer.is_valid():
             res = DNSDumpsterAPI().search(data['domains'])
             subs = []
