@@ -181,7 +181,7 @@ class dirDiscovery(APIView):
         
 
 class subDomainFind(APIView):
-    permission_classes = [permissions.IsAuthenticated]
+   # permission_classes = [permissions.IsAuthenticated]
     def get(self, request):
         scans = Scans.objects.filter(user=request.user.id)
         serializer = subDomainSerializer(scans, many=True)

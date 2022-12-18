@@ -1,6 +1,6 @@
 <template>
     <v-row>
-        <v-col cols="12" sm="6">
+        <v-col cols="7">
           <v-card 
         outlined
         width="750"
@@ -11,7 +11,7 @@
             </div>
         </v-card>
         </v-col>
-        <v-col cols="12" sm="3">
+        <v-col cols="5" >
           <v-card 
         outlined
         width="450"
