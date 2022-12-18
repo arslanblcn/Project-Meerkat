@@ -1,13 +1,40 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import permissions
+from rest_framework import permissions, generics
 from rest_framework import status
-from .serializers import subDomainSerializer
+from .serializers import subDomainSerializer, UserSerializer, RegisterSerializer
+from knox.models import AuthToken
 from .models import Scans
 from datetime import datetime
 import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 # Create your views here.
+from rest_framework.authtoken.serializers import AuthTokenSerializer
+from knox.views import LoginView as KnoxLoginView
+from django.contrib.auth import login
+
+class LoginAPI(KnoxLoginView):
+    permission_classes = (permissions.AllowAny,)
+
+    def post(self, request, format=None):
+        serializer = AuthTokenSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.validated_data['user']
+        login(request, user)
+        return super(LoginAPI, self).post(request, format=None)
+# Register API
+class RegisterAPI(generics.GenericAPIView):
+    serializer_class = RegisterSerializer
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
+        return Response({
+        "user": UserSerializer(user, context=self.get_serializer_context()).data,
+        "token": AuthToken.objects.create(user)[1]
+        })
+
 class bypass403(APIView):
     def post(self, request, *args, **kwargs):
         import requests
@@ -41,7 +68,7 @@ class bypass403(APIView):
         return Response(findings, status=status.HTTP_200_OK)
 
 class webAnalyzer(APIView):
-    permission_classes = [permissions.IsAuthenticated]
+    #permission_classes = [permissions.IsAuthenticated]
     def post(self, request, *args, **kwargs):
         from Wappalyzer import Wappalyzer, WebPage
         data = {
@@ -55,7 +82,7 @@ class webAnalyzer(APIView):
             results[url] = response
         return Response(results, status=status.HTTP_200_OK)
 class secretFinder(APIView):
-    permission_classes = [permissions.IsAuthenticated]
+    #permission_classes = [permissions.IsAuthenticated]
     def post (self, request, *args, **kwargs):
         import re
         from bs4 import BeautifulSoup
@@ -84,7 +111,7 @@ class secretFinder(APIView):
         return Response(finding, status=status.HTTP_200_OK)
                     
 class jsFinder(APIView):
-    permission_classes = [permissions.IsAuthenticated]
+    #permission_classes = [permissions.IsAuthenticated]
     def post(self, request, *args, **kwargs):
         from bs4 import BeautifulSoup
         import requests
@@ -102,7 +129,7 @@ class jsFinder(APIView):
         return Response(js_files, status=status.HTTP_200_OK)
 
 class waybackURL(APIView):
-    permission_classes = [permissions.IsAuthenticated]
+    #permission_classes = [permissions.IsAuthenticated]
     def get(self, request):
         
         return Response("Search historic URLs", status=status.HTTP_200_OK)
@@ -115,29 +142,19 @@ class waybackURL(APIView):
         UA = "Mozilla/5.0 (iPad; CPU OS 8_1_1 like Mac OS X) AppleWebKit/600.1.4 (KHTML, like Gecko) Version/8.0 Mobile/12B435 Safari/600.1.4"
         knowns = waybackpy.Url(url=data['url'], user_agent=UA).near(year=data['year']).known_urls(subdomain=False) # alive and subdomain are optional.
         return Response(knowns, status=status.HTTP_200_OK)
-class wafDetect(APIView):
-    permission_classes = [permissions.IsAuthenticated]
-    def get(self, request):
-        
-        return Response("Detect Firewall", status=status.HTTP_200_OK)
-    def post(self, request, *args, **kwargs):
-      import subprocess
-      data = {
-            'url': request.data.get('url'),
-        }
-      return Response(subprocess.check_output(["wafw00f", data['url']]), status=status.HTTP_200_OK)  
+
 class dirDiscovery(APIView):
+    #permission_classes = [permissions.IsAuthenticated]
     def get(self, request):
         import os
         from pathlib import Path
         BASE_DIR = Path(__file__).resolve().parent.parent 
-        wordlist = os.listdir(str(BASE_DIR) + "/wordlists")
+        wordlist = os.listdir(str(BASE_DIR) + "/wordlists/")
         return Response(wordlist, status=status.HTTP_200_OK)
     def post(self, request, *args, **kwargs):
-        import concurrent.futures 
-        import requests, os 
+        import requests, os
+        import concurrent.futures
         from pathlib import Path
-        context = {}
         data = {
             'url': request.data.get('url'),
             'filename': request.data.get('filename')
@@ -146,23 +163,26 @@ class dirDiscovery(APIView):
         BASE_URL = data['url'] # A list of potential directory names to try 
         wordlist = str(BASE_DIR) + f"/wordlists/{data['filename']}"
         dirs = []
+        
         if os.path.exists(wordlist):
             with open(wordlist, 'r') as fp:
                 words = fp.readlines()
-             # Perform the attack using multithreading 
-            with concurrent.futures.ThreadPoolExecutor() as executor: 
-                for directory in words: 
-                    url = BASE_URL + directory 
-                    future = executor.submit(requests.get, url)
-                    response = future.result() 
-                    if response.status_code == 200: 
-                        dirs.append(directory)
-            return Response(dirs, status=status.HTTP_200_OK)
+            for directory in words: 
+                dirs.append(str(BASE_URL) + "/" + directory)
+            successful_urls = []
+
+            # Create a ThreadPoolExecutor and submit a task for each URL
+            with concurrent.futures.ThreadPoolExecutor() as executor:
+                tasks = [executor.submit(lambda url: successful_urls.append(url) if requests.get(url, verify=False).status_code == 200 else None, url) for url in dirs]
+            # Wait for all tasks to finish
+            concurrent.futures.wait(tasks)
+            return Response(successful_urls, status=status.HTTP_200_OK)
         else:
             return Response("There is no such a file", status=status.HTTP_200_OK)
         
 
 class subDomainFind(APIView):
+    permission_classes = [permissions.IsAuthenticated]
     def get(self, request):
         scans = Scans.objects.filter(user=request.user.id)
         serializer = subDomainSerializer(scans, many=True)
