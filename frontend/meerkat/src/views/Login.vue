@@ -87,7 +87,7 @@ export default {
     login() {
       let user = { username: this.name, password: this.password };
       axios
-        .post("http://localhost:8000/api//login/", user)
+        .post("http://localhost:8000/api/login/", user)
         .then((response) => {
           if (response.status===200) {
             this.$router.push("/");
