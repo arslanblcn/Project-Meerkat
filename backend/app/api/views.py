@@ -8,7 +8,7 @@ from datetime import datetime
 import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 # Create your views here.
-class LoginAPI(KnoxLoginView):
+class LoginAPI(generics.GenericAPIView):
     permission_classes = (permissions.AllowAny,)
 
     def post(self, request, format=None):
