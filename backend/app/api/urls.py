@@ -1,5 +1,5 @@
 from django.urls import path, include
-from .views import subDomainFind,dirDiscovery, waybackURL, bypass403, jsFinder, secretFinder,webAnalyzer
+from .views import subDomainFind,dirDiscovery, waybackURL, bypass403, jsFinder, secretFinder,webAnalyzer, LoginAPI, RegisterAPI
 
 urlpatterns = [
     path("sublist3r/", subDomainFind.as_view(),  name="sublist3r"),
@@ -9,5 +9,6 @@ urlpatterns = [
     path("jsfinder/", jsFinder.as_view(),  name="jsfinder"),
     path("secretFinder/", secretFinder.as_view(),  name="secretfinder"),
     path("webAnalyzer/", webAnalyzer.as_view(),  name="webanalyzer"),
-    path('accounts/', include('django.contrib.auth.urls')),
+    path('login/', LoginAPI.as_view(),  name="login"),
+    path('register/', RegisterAPI.as_view(),  name="register"),
 ]
