@@ -1,7 +1,7 @@
 /* eslint-disable */
 <template>
-  <v-dialog v-model="dialog" @click:outside="closeFinderDialog" max-width="400">
-    <v-card width="400">
+  <v-dialog v-model="dialog" @click:outside="closeFinderDialog" max-width="600">
+    <v-card width="600">
       <v-card-text>
         <v-row>
           <v-col cols="12" class="mt-6">

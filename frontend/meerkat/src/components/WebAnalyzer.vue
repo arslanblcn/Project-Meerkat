@@ -3,9 +3,9 @@
   <v-dialog
     @click:outside="closeAnalyzerDialog"
     v-model="dialog"
-    max-width="400"
+    max-width="600"
   >
-    <v-card width="400">
+    <v-card width="600">
       <v-card-text>
         <v-row>
           <v-col cols="12" class="mt-6">
