@@ -80,7 +80,7 @@
                     </v-list-item-title>
                   </v-list-item>
                   <v-list-item link>
-                    <v-list-item-title @click="SecretFinder(item)">
+                    <v-list-item-title @click="secretFinder(item)">
                       <v-icon left>mdi-arrow-collapse-all</v-icon>Secret Finder
                     </v-list-item-title>
                   </v-list-item>

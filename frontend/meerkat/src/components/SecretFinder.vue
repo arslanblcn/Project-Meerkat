@@ -19,17 +19,16 @@
             ></v-text-field>
           </v-col>
         </v-row>
-        Founded JS Files
-        <v-row class="ml-1" v-if="responses.length === 0"
-          >There is no founded js files</v-row
-        >
+        Founded Secrets
+
         <v-row>
-          <v-chip-group>
-            <v-chip class="ml-2" v-for="item in responses" :key="item">
-              {{ item }}
-            </v-chip>
-          </v-chip-group></v-row
-        >
+          <v-data-table
+            :headers="headers"
+            :items="dataTableItems"
+            :search="search"
+          >
+          </v-data-table
+        ></v-row>
       </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
@@ -48,19 +47,27 @@ import axios from "axios";
 /* eslint-disable */
 export default {
   props: { dialog: { type: Boolean }, url: { type: String } },
-  data: () => ({ loading: false, responses: [] }),
+  data: () => ({
+    search: null,
+    loading: false,
+    responses: [],
+    dataTableItems: [],
+    headers: [
+      { text: "Url", value: "url", width: 200, align: "start" },
+      { text: "Key", value: "key", width: 200, align: "start" },
+    ],
+  }),
   methods: {
     save() {
       this.loading = true;
       let secretFinder = [];
-      secretFinder.push(this.url);
+      secretFinder.push("https://" + this.url);
       let sendingObj = { urls: secretFinder };
       axios
         .post("http://localhost:8000/api/secretFinder/", sendingObj)
         .then((response) => {
-          console.log(response.data);
-          this.responses = response.data;
           this.loading = false;
+          this.dataTableItems = response.data;
         });
     },
     closeSecretFinderDialog() {

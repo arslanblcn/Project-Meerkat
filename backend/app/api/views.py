@@ -100,9 +100,8 @@ class secretFinder(APIView):
             'urls': request.data.get('urls')
         }
         api_key_regex = r"([0-9a-zA-Z/+]{40})"
-
-        finding = {"url":[], 'key': []}
-        str1 = ""
+        findings=[]
+        finding = {}
         # Loop over the URLs
         for url in data['urls']:
             # Make a GET request to the URL
@@ -114,9 +113,10 @@ class secretFinder(APIView):
             
             # If an API key was found, print it
             if api_key is not None:
-                finding["url"].append(url)
-                finding['key'].append(str1.join(api_key))
-        return Response(finding, status=status.HTTP_200_OK)
+                finding['url']=url
+                finding['key']=api_key
+            findings.append(finding)
+        return Response(findings, status=status.HTTP_200_OK)
                     
 class jsFinder(APIView):
     #permission_classes = [permissions.IsAuthenticated]
