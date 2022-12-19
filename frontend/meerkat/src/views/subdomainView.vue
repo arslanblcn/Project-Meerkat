@@ -79,6 +79,11 @@
                       <v-icon left>mdi-arrow-collapse-all</v-icon>Wayback Scan
                     </v-list-item-title>
                   </v-list-item>
+                  <v-list-item link>
+                    <v-list-item-title @click="SecretFinder(item)">
+                      <v-icon left>mdi-arrow-collapse-all</v-icon>Secret Finder
+                    </v-list-item-title>
+                  </v-list-item>
                 </v-list>
               </v-menu>
             </template>
@@ -105,6 +110,11 @@
         :url="wbscanUrl"
         @closeScanDialog="wbscanDialog = false"
       />
+      <secret-finder
+        :dialog="secretFinderDialog"
+        :url="secretFinderUrl"
+        @closeSecretFinderDialog="secretFinderDialog = false"
+      />
     </v-main>
   </v-app>
 </template>
@@ -115,6 +125,7 @@ import SideBar from "@/components/SideBar.vue";
 import NavBar from "../components/NavBar.vue";
 import Dialog from "../components/AttackDialog.vue";
 import WebAnalyzer from "../components/WebAnalyzer.vue";
+import SecretFinder from "../components/SecretFinder.vue";
 import JsFinder from "../components/JsFinder.vue";
 import WaybackScan from "../components/WaybackScan.vue";
 import axios from "axios";
@@ -126,7 +137,8 @@ export default {
     Dialog,
     WebAnalyzer,
     JsFinder,
-    WaybackScan
+    WaybackScan,
+    SecretFinder,
   },
   data() {
     return {
@@ -134,8 +146,10 @@ export default {
       analyzerDialog: false,
       analyzerUrl: null,
       finderDialog: false,
-      wbscanDialog:false,
-      wbscanUrl:null,
+      secretFinderUrl: null,
+      secretFinderDialog: false,
+      wbscanDialog: false,
+      wbscanUrl: null,
       finderUrl: null,
       loading: false,
       loader: null,
@@ -207,6 +221,10 @@ export default {
     webAnalyzer(item) {
       this.analyzerDialog = true;
       this.analyzerUrl = item.domain;
+    },
+    secretFinder(item) {
+      this.secretFinderDialog = true;
+      this.secretFinderUrl = item.domain;
     },
     jsFinder(item) {
       this.finderDialog = true;
