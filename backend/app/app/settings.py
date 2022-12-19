@@ -27,14 +27,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        # 'rest_framework.authentication.BasicAuthentication',
-        # 'rest_framework.authentication.SessionAuthentication',
-        'knox.auth.TokenAuthentication',
-    ]
-}
-
+LOGIN_REDIRECT_URL = "/"
+LOGOUT_REDIRECT_URL = "/"
 # Application definition
 
 INSTALLED_APPS = [
@@ -47,7 +41,6 @@ INSTALLED_APPS = [
     'rest_framework',
     'api',
     'corsheaders',
-    'knox'
 ]
 
 MIDDLEWARE = [
