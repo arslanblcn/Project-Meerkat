@@ -5,6 +5,7 @@ import subdomainView from '../views/subdomainView.vue'
 import wordlistView from '../views/wordlistView'
 import LoginView from '../views/Login'
 import RegisterView from '../views/Register'
+import ByPass from '../views/ByPass'
 
 Vue.use(VueRouter)
 
@@ -17,6 +18,11 @@ const routes = [{
         path: '/subdomain',
         name: 'subdomain',
         component: subdomainView
+    },
+    {
+        path: '/bypass',
+        name: 'bypass',
+        component: ByPass
     },
     {
         path: '/createWordlist',

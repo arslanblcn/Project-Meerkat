@@ -47,6 +47,11 @@ export default {
           icon: "fa-solid fa-subscript",
           path: "/subdomain",
         },
+        {
+          title: "ByPass403",
+          icon: "mdi-send",
+          path: "/bypass",
+        },
       ],
       mini: true,
     };
