@@ -15,7 +15,7 @@
           </v-icon>
         </v-card-title>
         <v-card-text>
-          19
+          15
         </v-card-text>
       </v-card>
     </v-col>
@@ -34,7 +34,7 @@
           </v-icon>
         </v-card-title>
         <v-card-text>
-          30
+          1
         </v-card-text>
       </v-card>
     </v-col>
@@ -53,7 +53,7 @@
            </v-icon>
         </v-card-title>
         <v-card-text>
-          5
+          6
         </v-card-text>
       </v-card>
     </v-col>
@@ -72,7 +72,7 @@
            </v-icon>
         </v-card-title>
         <v-card-text>
-          14
+          0
         </v-card-text>
       </v-card>
     </v-col>

@@ -50,7 +50,7 @@ export default {
                 type: "pie",
                 },
                 title: {
-                    text: 'Detected Anomalies',
+                    text: 'Founded Vulns',
                     align: 'center',
                     style: {
                         fontSize: '13px',
@@ -70,7 +70,7 @@ export default {
         },
         series: [{
           name: 'Number of analysis',
-          data: [10,21,6,5,17, 15,64,30, 40, 35, 50, 49]
+          data: [0,0,0,0,0, 0,0,0, 0, 0, 3, 12]
         }],
         anomalies: [5, 2, 1, 6],
       }
